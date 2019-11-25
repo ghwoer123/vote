@@ -1,27 +1,30 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const createError = require('http-errors');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const logger = require('morgan');
+require('./extension');
 
 
 //var indexRouter = require('./routes/index');
-var loginRouter = require('./routes/login');
-var usersRouter = require('./routes/users');
-var registRouter = require('./routes/regist');
-var listRouter = require('./routes/list');
-var ongoingRouter = require('./routes/ongoing');
-var voteRouter= require('./routes/vote');
-var resultRouter = require('./routes/result');
-var logoutRouter = require('./routes/logout');
+const loginRouter = require('./routes/login');
+const usersRouter = require('./routes/users');
+const registRouter = require('./routes/regist');
+const listRouter = require('./routes/list');
+const ongoingRouter = require('./routes/ongoing');
+const voteRouter = require('./routes/vote');
+const deleteRouter = require('./routes/delete');
+const resultRouter = require('./routes/result');
+const logoutRouter = require('./routes/logout');
+const sendRouter = require('./routes/send');
 
-var app = express();
+const app = express();
 
-var session = require('express-session');
-var MySQLStore = require('express-mysql-session')(session);
+const session = require('express-session');
+const MySQLStore = require('express-mysql-session')(session);
 
-var passport = require('passport');
-var LocalStrategy = require('passport-local').Strategy;
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
 //var flash = require('connect-flash');
 
 // view engine setup
@@ -40,9 +43,9 @@ app.use(session({
   store: new MySQLStore({
     host: 'localhost',
     port: 3306,
-    user: 'root',
-    password:'32167352',
-    database:'voting'
+    user: 'nodejs',
+    password: process.env.DB_PASSWORD || '',
+    database:'votedb'
   })//cookie secure? 
 
   }))
@@ -59,8 +62,11 @@ app.use('/login',loginRouter);
 app.use('/regist',registRouter);
 app.use('/ongoing',ongoingRouter);
 app.use('/vote',voteRouter);
+app.use('/vote/delete',deleteRouter);
 app.use('/result',resultRouter);
 app.use('/logout',logoutRouter);
+app.use('/vote/send',sendRouter);
+
 
 
 // catch 404 and forward to error handler
@@ -78,5 +84,7 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+app.use(express.static(__dirname + '/public'));
 
 module.exports = app;
